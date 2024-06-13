@@ -1,20 +1,22 @@
 # WebMonitor
- Änderungen by zeroTM
- Datum: 06/2024
-  
-   Änderungen
-   -- Adafruit ILI9341 
-   ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)
-   -- ILI9341_Graphic.h (class komplett entfernt)
-   -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)
-   
-   in planung:
-   ## auf Platformio wechseln
-   ## ESP32 unterstützung
-   ## Konfiguration erweitern(Einstellungen editierbar machen, Einstellungen erweitern)
-   ## Touchscreen unterstützung
-   ## Router Statistik 
-   ## Call-Monitor
+ Änderungen by zeroTM<br>
+ Datum: 06/2024<br>
+ <br> 
+   Änderungen:  
+   -- Adafruit ILI9341<br>
+   ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)<br>
+   -- ILI9341_Graphic.h (class komplett entfernt)<br>
+   -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)<br>
+   <br>
+   <br>
+   In planung:<br>
+   ** auf Platformio wechseln<br>
+   ** ESP32 unterstützung<br>
+   ** Konfiguration erweitern(Einstellungen editierbar machen, Einstellungen erweitern)<br>
+   ** Touchscreen unterstützung<br>
+   ** Router Statistik<br>
+   ** Call-Monitor<br>
+   <br>
    
 ## Motivation
 Im ersten Covid-19 Lockdown 2020 in Deutschland hatte ich einen sehr langsamen Internetzugang und war zeitweilig im Home-Office.
