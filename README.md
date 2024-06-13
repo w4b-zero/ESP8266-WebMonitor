@@ -7,7 +7,7 @@ Original Code von: <br>
  Änderungen by zeroTM<br>
  Datum: 06/2024<br>
  <br> 
-   Änderungen:  
+   Änderungen: <br> 
    -- Adafruit ILI9341<br>
    ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)<br>
    -- ILI9341_Graphic.h (class komplett entfernt)<br>
