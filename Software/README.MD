@@ -1,4 +1,9 @@
 # Software
+Original Code von: <br> 
+ * Autor: Jörg Bernhardt<br>
+ * Datum: 11/2020<br>
+ * Source: https://github.com/Joerg-66/ESP8266-WebMonitor<br>
+<br>
  Änderungen by zeroTM<br>
  Datum: 06/2024<br>
  <br> 
