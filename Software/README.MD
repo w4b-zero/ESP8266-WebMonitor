@@ -1,4 +1,21 @@
 # Software
+ Änderungen by zeroTM
+ Datum: 06/2024
+  
+   Änderungen
+   -- Adafruit ILI9341 
+   ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)
+   -- ILI9341_Graphic.h (class komplett entfernt)
+   -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)
+   
+   in planung:
+   ## auf Platformio wechseln
+   ## ESP32 unterstützung
+   ## Konfiguration erweitern(Einstellungen editierbar machen, Einstellungen erweitern)
+   ## Touchscreen unterstützung
+   ## Router Statistik 
+   ## Call-Monitor
+   
 ## Die Entwicklungsumgebung
 
 Lade und installiere von der Seite https://www.arduino.cc die Software Arduino (Version 1.8.15)
@@ -6,7 +23,6 @@ Lade und installiere von der Seite https://www.arduino.cc die Software Arduino (
 Istalliere die folgenden Arduino Bibliotheken:
 * Adafruit GFX Library	(Version 1.10.10)
 * Adafruit BusIO			(Version 1.9.0)
-* Adafruit ILI9341		(Version 1.5.9)
 * Adafruit STMPE610		(Version 1.1.3)
 * Adafruit TouchScreen	(Version 1.1.2)
 
@@ -14,6 +30,12 @@ Lade und installiere die TR-064 Bibliotheken von:
 * https://github.com/Aypac/Arduino-TR-064-SOAP-Library   (Version: 1.1.0 - Feb 2020)
 Diese Bibliothek ist eine großartige Arbeit von René Vollmer und übernimmt die TR-064 Kommunikation zum Router.
 Um diese Bibliothek nicht zu modifizieren, wurden die TR064_Query.h und TR064_Query.cpp als Zwischenschicht geschrieben.
+
+Lade und installiere die TFT_eSPI Bibliothek von:
+* https://github.com/Bodmer/TFT_eSPI (Version: master - Aktuell Jun 2024)
+Umfangreiche Bibliothek zum einfachen einbinden von vielen TFT-Displays - geschrieben von Bodmer
+** unter seine Github Repositories sind einige interessante und nützliche Bibliotheken zu finden **
+** https://github.com/Bodmer?tab=repositories **
 
 In der Arduino IDE unter "Voreinstellungen" im Feld "Zusätzliche Boardverwalter-URLs den folgenden Eintrag hinzufügen:
 * https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -25,15 +47,14 @@ ESP8266 Community		(Version 2.7.4)
 Jetzt ist in der Arduino IDE das Board "LOLIN(WEMOS) D1 R2 & mini" verfügbar und kann ausgewählt werden.
 Alle Werte behalten die Default Werte. Die Flash Size ist "4MB (FS:2MB OTA:~1019KB)"
 
-Jetzt kann das Verzeichnis "WebMonitor_1-3" (siehe oben auf der Website) inklusive aller enthaltenen Dateien auf den lokalen Rechner kopiert werden.
+Jetzt kann das Verzeichnis "WebMonitor_1" (siehe oben auf der Website) inklusive aller enthaltenen Dateien auf den lokalen Rechner kopiert werden.
 Verbindet man nun den PC über ein Micro-USB Kabel mit dem ESP8266, kann der Quellcode kompiliert und in den Mikrocontroller geschrieben werden.
 
 <br>
 
 ## Quellcode
-Das Hauptprogramm befindet sich in der Arduino Datei "WebMonitor_1-3.ino"
+Das Hauptprogramm befindet sich in der Arduino Datei "WebMonitor_1.ino"
 Die Dateien "ESP_Settings.h" und "ESP_Settings.cpp" stellen die ESP8266 Website dar und steuern die Konfiguration im ESP8266 internen EEPROM.
-Die Dateien "ILI9341_Graphic.h" und "ILI9341_Graphic.cpp" steuern die grafische Darstellung auf dem LC-Display.
 Die Dateien "TR064_Query.h" und "TR064_Query.cpp" beinhalten die Kommunikationsroutinen zur Steuerung der Bibliothek "TR-064-SOAP-Library".
 
 Im Quellcode gibt es die Schwierigkeit, dass im Arduino Compiler die TR-064 Instanz erstellt werden muss bevor die Einstellungen aus dem EEPROM ausgelesen werden können.
@@ -59,12 +80,12 @@ Es gibt zwei Gitternetze, die den Upload (oben - Cyan) und Download (unten - Gr�
 Die Werte rechts neben den Gitternetze zeigen je nach Konfiguration die maximale eingestellte oder maximale reale Bandbreite.
 Zusätzlich wird die aktuelle Up- bzw. Download- Geschwindigkeit angezeigt.
 
-Die Funtion wurde mit den Routermodellen Fritz!Box 7490, Fritz!Box 7530 und Fritz!Box 7590 der Firma AVM getestet.
+Die Funtion wurde mit den Routermodellen Fritz!Box 7490, Fritz!Box 7530, Fritz!Box 7560 und Fritz!Box 7590 der Firma AVM getestet.
 Es sollten aber auch weitere Modelle des Herstellers funktionieren.
 
 <br>
 
-![grafik](https://user-images.githubusercontent.com/88629497/132059430-e62f5a19-c777-447f-8e63-0b5fd90355f9.png)
+![grafik](images/display_beschreibung.png)
 <br>
 
 ### *Zu den Einstellungen der Nutzerdaten und in der Fritz!Box siehe Verzeichnis "Quick and Easy"*
@@ -84,7 +105,6 @@ Install the following Arduino libraries:
 Istalliere die folgenden Arduino Bibliotheken:
 * Adafruit GFX Library	(Version 1.10.10)
 * Adafruit BusIO			(Version 1.9.0)
-* Adafruit ILI9341		(Version 1.5.9)
 * Adafruit STMPE610		(Version 1.1.3)
 * Adafruit TouchScreen	(Version 1.1.2)
 
@@ -92,6 +112,12 @@ Download and install the TR-064 libraries from:
 * https://github.com/Aypac/Arduino-TR-064-SOAP-Library (version: 1.1.0 - Feb 2020).
 This library is a great work by René Vollmer and handles the TR-064 communication to the router.
 To avoid modifying this library, TR064_Query.h and TR064_Query.cpp were written as an intermediate layer.
+
+Download and install the TFT_eSPI libraries from:
+* https://github.com/Bodmer/TFT_eSPI (version: master - Jun 2024)
+Comprehensive library for easy integration of many TFT displays - written by Bodmer
+** some interesting and useful libraries can be found in his Github repositories **
+** https://github.com/Bodmer?tab=repositories **
 
 In the Arduino IDE under "Preferences" in the field "Additional board manager URLs add the following entry:
 * https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -103,7 +129,7 @@ ESP8266 Community (Version 2.7.4)
 Now the board "LOLIN(WEMOS) D1 R2 & mini" is available in the Arduino IDE and can be selected.
 All values keep the default values. The Flash Size is "4MB (FS:2MB OTA:~1019KB)".
 
-Now the directory "WebMonitor_1-3" (see above on the website) including all contained files can be copied to the local computer.
+Now the directory "WebMonitor_1" (see above on the website) including all contained files can be copied to the local computer.
 If you now connect the PC to the ESP8266 via a micro USB cable, the source code can be compiled and written to the microcontroller.
 
 <br>
@@ -111,7 +137,6 @@ If you now connect the PC to the ESP8266 via a micro USB cable, the source code 
 ## Source code
 The main program is located in the Arduino file "WebMonitor_1-3.ino".
 The files "ESP_Settings.h" and "ESP_Settings.cpp" represent the ESP8266 website and control the configuration in the ESP8266 internal EEPROM.
-The files "ILI9341_Graphic.h" and "ILI9341_Graphic.cpp" control the graphical representation on the LC display.
 The files "TR064_Query.h" and "TR064_Query.cpp" contain the communication routines to control the library "TR-064-SOAP-Library".
 
 In the source code there is the difficulty that in the Arduino compiler the TR-064 instance must be created before the settings can be read from the EEPROM.
@@ -142,7 +167,7 @@ However, other models from the manufacturer should also work.
 
 <br>
 
-![grafik](https://user-images.githubusercontent.com/88629497/132061516-9ecd5f64-15d9-4938-a7a9-96ab74c1db56.png)
+![grafik](images/display_beschreibung.png)
 <br>
 
 ### *For the settings of the user data and in the Fritz!Box, see directory "Quick and Easy"*

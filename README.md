@@ -1,4 +1,21 @@
 # WebMonitor
+ Änderungen by zeroTM
+ Datum: 06/2024
+  
+   Änderungen
+   -- Adafruit ILI9341 
+   ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)
+   -- ILI9341_Graphic.h (class komplett entfernt)
+   -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)
+   
+   in planung:
+   ## auf Platformio wechseln
+   ## ESP32 unterstützung
+   ## Konfiguration erweitern(Einstellungen editierbar machen, Einstellungen erweitern)
+   ## Touchscreen unterstützung
+   ## Router Statistik 
+   ## Call-Monitor
+   
 ## Motivation
 Im ersten Covid-19 Lockdown 2020 in Deutschland hatte ich einen sehr langsamen Internetzugang und war zeitweilig im Home-Office.
 Bei Problemen in Videokonferenzen wollte ich der Ursache auf den Grund gehen und wissen wie die aktuelle Netzwerklast zum Internet war.
@@ -6,7 +23,7 @@ Zwar hatte mein derzeitiger Router, eine Fritz!Box 7490, eine Übersicht darübe
 Die Idee war es einen ESP8266 Controller per WLAN an den Router zu koppeln und die benötigten Informationen per TR-064 Protokoll auszulesen.
 Daraus ist dieses kleine Hard- und Softwareprojekt hervorgegangen.
 <br>
-***Es wurde mit den Routermodellen Fritz!Box 7490, Fritz!Box 7530 und Fritz!Box 7590, sollte aber auch mit anderen Modellen funktionieren.***
+***Es wurde mit den Routermodellen Fritz!Box 7490, Fritz!Box 7530, Fritz!Box 7560 und Fritz!Box 7590, sollte aber auch mit anderen Modellen funktionieren.***
 <br>
 *Hinweis: "Fritz!Box" ist ein Markenname der Firma AVM GmbH in Berlin*
 <br>
@@ -18,14 +35,14 @@ Although my current router, a Fritz!Box 7490, had an overview of this on an inte
 The idea was to connect an ESP8266 controller via wifi to the router and read out the needed information via TR-064 protocol.
 This tiny hardware and software project was the result.
 <br>
-***It was tested with the router models Fritz!Box 7490, Fritz!Box 7530 and Fritz!Box 7590, but should also work with other models.***
+***It was tested with the router models Fritz!Box 7490, Fritz!Box 7530, Fritz!Box 7560 and Fritz!Box 7590, but should also work with other models.***
 <br>
 *Notice: "Fritz!Box" is a brand name of the company AVM GmbH in Berlin*
 <br>
 <br>
 <br>
 <br>
-![Board_02](https://user-images.githubusercontent.com/88629497/131263851-c4c651b0-937a-43f5-a703-0f1527c2069a.jpg)
+![Board_02](Software/images/board.jpg)
 <br>
 <br>
 
@@ -53,5 +70,5 @@ This tiny hardware and software project was the result.
 * download overview of the last minutes
 <br>
 
-![LCD_03](https://user-images.githubusercontent.com/88629497/131263840-388d4b19-04d7-47f2-a3be-433c8e06c6d0.jpg)
+![LCD_03](Software/images/display.jpg)
 
