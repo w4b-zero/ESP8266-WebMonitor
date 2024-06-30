@@ -5,6 +5,7 @@ Original Code von: <br>
  * Source: https://github.com/Joerg-66/ESP8266-WebMonitor<br>
 <br>
  Änderungen by zeroTM<br>
+ 
 # Version: 1.3+z1.1
  Datum: 30/06/2024<br>
  <br>
@@ -15,6 +16,7 @@ Original Code von: <br>
    ++ Grüne LED als Power/Boot Indicator (Boot: blinkend, Internet erkannt: on, Internet getrennt: blinkend)<br>
    ++ Rote LED als TR064-Kommunikations Indicator (bei TR064 aufrufen blinkend)<br>
  <br>   
+
 # Version: 1.3+z1 
  Datum: 06/2024<br>
  <br> 
@@ -24,6 +26,7 @@ Original Code von: <br>
    -- ILI9341_Graphic.h (class komplett entfernt)<br>
    -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)<br>
    <br>
+
 ## Die Entwicklungsumgebung
 Lade und installiere von der Seite https://www.arduino.cc die Software Arduino (Version 1.8.15) <br>
  <br>
