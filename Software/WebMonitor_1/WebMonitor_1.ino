@@ -48,15 +48,12 @@
  * 
  * wichtige Links:
  * https://github.com/Bodmer/TFT_eSPI
- * https://github.com/adafruit/Adafruit-GFX-Library
- * https://github.com/dancol90/ESP8266Ping
- * https://github.com/marian-craciunescu/ESP32Ping
  * https://github.com/Aypac/Arduino-TR-064-SOAP-Library
  * 
  */
 #define FirmwareName "Web_Monitor"
 #define HostName "WebMonitor"
-#define FirmwareVersion "1.3+z1"
+#define FirmwareVersion "1.3+z1.1"
 
 #if defined(ESP8266)
   #include <ESP8266WiFi.h>
