@@ -6,13 +6,27 @@
  * Board: LoLin ESP8266 D1 Mini
  * 
  * Änderungen by zeroTM
- * Datum: 06/2024
  * 
- *  Änderungen
- *  -- Adafruit ILI9341 
- *  ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)
- *  -- ILI9341_Graphic.h (class komplett entfernt)
- *  -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)
+ * # Version: 1.3+z1.1
+ * Datum: 30/06/2024<br>
+ *
+ * Änderungen
+ * ++ FastLED Library (3.7.0) <br>
+ * ++ 8 WS2812b Leds<br>
+ *    Pin4[SD_CS] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
+ * ++ Grüne LED als Power/Boot Indicator (Boot: blinkend, Internet erkannt: on, Internet getrennt: blinkend)<br>
+ *    Pin0[T_CS] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
+ * ++ Rote LED als TR064-Kommunikations Indicator (bei TR064 aufrufen blinkend)<br>
+ *    Pin16[T_IRQ] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
+ *
+ * # Version: 1.3+z1 
+ * Datum: 06/2024<br>
+ * 
+ * Änderungen: <br> 
+ * -- Adafruit ILI9341<br>
+ * ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)<br>
+ * -- ILI9341_Graphic.h (class komplett entfernt)<br>
+ * -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)<br>
  *  
  *  in planung:
  *  ## auf Platformio wechseln
