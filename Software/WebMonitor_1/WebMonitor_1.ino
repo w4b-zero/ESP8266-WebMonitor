@@ -41,6 +41,7 @@
  * 
  */
 #define FirmwareName "Web_Monitor"
+#define HostName "WebMonitor"
 #define FirmwareVersion "1.3+z1"
 
 #if defined(ESP8266)
@@ -65,12 +66,20 @@ TFT_eSPI Display = TFT_eSPI();   // Invoke library
 
 #include "ESP_Settings.h"
 #include "TR064_Query.h"
+#include "FastLED.h"                                     
 
 // TFT-Einstellungen in der Datei "User_Setup.h" einstellen (im Ordner der TFT-eSPI Bibliothek)
 //#define TFT_CS      15    // TFT CS  Pin ist verbunden mit NodeMCU Pin D8
 //#define TFT_RST     16    // TFT RST Pin ist verbunden mit NodeMCU Pin D0
 //#define TFT_DC      5     // TFT DC  Pin ist verbunden mit NodeMCU Pin D1
-
+#define INDICATOR_LED_GREEN 0 // cut connection from T_CS and T_IRQ (touchscreen is not used!) and use it for network status leds (NodeMCU Pin D3)
+#define INDICATOR_LED_RED 16// cut connection from T_CS and T_IRQ (touchscreen is not used!) and use it for network status leds (NodeMCU Pin D0) 
+#define NEOPIXEL_PIN 4// cut connection from SD_CS (cardreader is not used!) and use it for a ws2812 rgbled-strip (NodeMCU Pin D2) 
+#define COLOR_ORDER GRB                                       
+#define LED_TYPE WS2812                                       
+#define NUM_LEDS 8
+uint8_t max_bright = 50;                         
+struct CRGB leds[NUM_LEDS]; 
 
 #define LED_RED     1     // Rote LED ist verbunden mit NodeMCU Pin TX
 #define LED_GREEN   3     // Grüne LED ist verbunden mit NodeMCU Pin RX
@@ -79,9 +88,18 @@ TFT_eSPI Display = TFT_eSPI();   // Invoke library
 
 #define TFT_DARKORANGE 0xCB05
 
+String GreenLEDMode = "off"; // off=start, blink=no internet/reconnect internet, on=internet connection
+String RedLEDMode = "blink"; // off=start, blink=no internet/reconnect internet, on=internet connection
+String BlinkMode = "normal";
+
 ESP_Settings MyESP;                                                       // "MyESP" = neue Instanz der Klasse "ESP_Settings"
 TR064_Query TR_064 = TR064_Query(49000, "192.168.178.254", "admin", "");  // "TR_064" = neue Instanz der Klasse "TR064_Query"
 Ticker TickTimer;
+Ticker blinkerGreen;
+Ticker blinkerRed;
+Ticker blinkerTest;
+Ticker StatusTest;
+Ticker NEOPIXEL_Ticker;
 
 const char DEVICE_NAME[] = "ESP8266_TR064";
 int iPosX = 10;
@@ -129,6 +147,44 @@ void TickerCounter(void);
 //long S1_msTime(void);
 //long S2_msTime(void);
 
+void changeStateGreen(void)
+{
+  if(GreenLEDMode == "blink") {
+  digitalWrite(INDICATOR_LED_GREEN, !(digitalRead(INDICATOR_LED_GREEN)));  //Invert Current State of LED  
+  }
+  if(GreenLEDMode == "off") {
+  digitalWrite(INDICATOR_LED_GREEN, LOW); 
+  }
+  if(GreenLEDMode == "on") {
+  digitalWrite(INDICATOR_LED_GREEN, HIGH); 
+  }
+}
+void changeStateRed(void)
+{
+  if(RedLEDMode == "blink") {
+  digitalWrite(INDICATOR_LED_RED, !(digitalRead(INDICATOR_LED_RED)));  //Invert Current State of LED  
+  }
+  if(RedLEDMode == "off") {
+  digitalWrite(INDICATOR_LED_RED, LOW); 
+  }
+  if(RedLEDMode == "on") {
+  digitalWrite(INDICATOR_LED_RED, HIGH); 
+  }
+}
+void testBlinkPoints(void) {
+  if(BlinkMode == "test"){
+  Serial.print("."); 
+  Display.print("."); 
+  }
+}
+void LedTicker(void) {
+    uint8_t thisSpeed = 30;
+    uint8_t deltaHue= 10;
+    uint8_t thisHue = beat8(thisSpeed,255); 
+    fill_rainbow(leds, NUM_LEDS, thisHue, deltaHue);            
+    FastLED.show();
+}
+
 void setup(){
   ESP.wdtDisable();             // Disable ESP8266 Software Watchdog
     
@@ -140,44 +196,130 @@ void setup(){
   String sMaxDL_Speed = String(ulMaxDL_Speed);
   unsigned long ulMaxUL_Speed = MyESP.Read_Upload_Speed();
   String sMaxUL_Speed = String(ulMaxUL_Speed);
+            GreenLEDMode = "off";
+            RedLEDMode = "off";
   
   Serial.begin(115200);
+  LEDS.addLeds<LED_TYPE, NEOPIXEL_PIN, COLOR_ORDER>(leds, NUM_LEDS);      
+   FastLED.setBrightness(max_bright);         
 
-  pinMode(SWITCH_01, INPUT);
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  digitalWrite(LED_RED, LOW); 
-  digitalWrite(LED_GREEN, LOW); 
-  
+  pinMode(INDICATOR_LED_GREEN, OUTPUT);
+  pinMode(INDICATOR_LED_RED, OUTPUT);
+  digitalWrite(INDICATOR_LED_GREEN, LOW); 
+  digitalWrite(INDICATOR_LED_RED, LOW); 
   Display.begin();               // Initialise the display
   Display.setRotation(1);
   Display.fillScreen(TFT_BLACK); // Black screen fill
   Display.invertDisplay( true );
-
-  
-  ProgState = NORMAL;
-  if((analogRead(SWITCH_02) < 512) || (digitalRead(SWITCH_01) == LOW)){
-    ProgState = DEMO;
-    ArduinoOTA.begin();
-  }
-
-  if(ProgState == NORMAL){
     Display.fillScreen(TFT_BLACK);
     DrawLogo(190,10);
     Display.setTextSize(1);
     Display.setCursor(207, 100);
     Display.setTextColor(TFT_CYAN);
     Display.print("FW v."); Display.print(FirmwareVersion);
+    Serial.print("FW v.");
+    Serial.println(FirmwareVersion);
     Display.setTextColor(TFT_WHITE);
     Display.setCursor(10, 25);
-    Display.println("Konfiguration starten.");
+    Display.println("** Programm Init **");
+    iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
+    Display.println("LedTest: blink 5s");
+      iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
+
+        
+   
+    Serial.println("");
+    Serial.println("");
+    Serial.println("**************");
+    Serial.println("Programm Init");
+    Serial.println("**************");
+    //Serial.println("Init Ticker");
+  //Initialize Ticker every 0.5s
+  blinkerGreen.attach(0.5, changeStateGreen); //Use attach_ms if you need 
+  blinkerRed.attach(0.1, changeStateRed); //Use attach_ms if you need 
+  blinkerTest.attach(1.0, testBlinkPoints); //Use attach_ms if you need 
+  //StatusTest.attach(60.0, showMyStatus); //Use attach_ms if you need 
+  NEOPIXEL_Ticker.attach(0.1, LedTicker); //Use attach_ms if you need 
+    
+
+//ledtest
+    Serial.println("LedTest: blink 5s");
+            Serial.print(".");  
+            BlinkMode = "test";
+            GreenLEDMode = "blink";
+            RedLEDMode = "blink";
+            delay(5000);
+    Serial.println("");
+    Serial.println("LedTest ende.");
+        iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
+        Display.println("LedTest ende.");
+            BlinkMode = "normal";
+            GreenLEDMode = "off";
+            RedLEDMode = "off";
+  
+
+  pinMode(SWITCH_01, INPUT);
+  //pinMode(LED_RED, OUTPUT);
+  //pinMode(LED_GREEN, INPUT);
+  //digitalWrite(LED_RED, LOW); 
+  //digitalWrite(LED_GREEN, LOW); 
+    Display.setTextColor(TFT_YELLOW);
+    iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
+    Display.print("Konfiguration starten ");
+    Serial.println("Konfiguration starten");
+    for (int i=10; i>0; i--){
+      Display.print(".");
+      if(i == 10){ Serial.println("[          ]");}
+      if(i == 9){  Serial.println("[.         ]");}
+      if(i == 8){  Serial.println("[..        ]");}
+      if(i == 7){  Serial.println("[...       ]");}
+      if(i == 6){  Serial.println("[....      ]");}
+      if(i == 5){  Serial.println("[.....     ]");}
+      if(i == 4){  Serial.println("[......    ]");}
+      if(i == 3){  Serial.println("[.......   ]");}
+      if(i == 2){  Serial.println("[........  ]");}
+      if(i == 1){  Serial.println("[......... ]");}
+      if(i == 0){  Serial.println("[..........]");}
+      delay(500);
+      ESP.wdtFeed();
+    }
+    Serial.println("");
+iPosX = 10;
+iPosY = 20;
+
+
+
+  
+  ProgState = NORMAL;
+  if((analogRead(SWITCH_02) < 512) || (digitalRead(SWITCH_01) == LOW)){
+    ProgState = DEMO;
+    Serial.print("ProgState: ");
+    Serial.println("DEMO");
+    ArduinoOTA.begin();
+  }
+
+  if(ProgState == NORMAL){
+    Serial.print("ProgState: ");
+    Serial.println("NORMAL");
+    Display.fillScreen(TFT_BLACK);
+    DrawLogo(190,10);
+    Display.setTextSize(1);
+    Display.setCursor(207, 100);
+    Display.setTextColor(TFT_CYAN);
+    Display.print("FW v."); Display.print(FirmwareVersion);
+    Serial.print("FW v.");
+    Serial.println(FirmwareVersion);
+    Display.setTextColor(TFT_WHITE);
+    Display.setCursor(10, 25);
+    Display.println("** Konfiguration **");
+    Serial.println("** Konfiguration ** ");
     iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
     sWifiSSID.trim();
     if(sWifiSSID == ""){                                // Sind Netzwerkeinstellungen im EEPROM gespeichert?    
       WiFi.disconnect();
       WiFi.mode(WIFI_AP);
       WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
-      WiFi.softAP(FirmwareName);                  // SSID = "Web_Monitor" [kein Passwort]
+      WiFi.softAP(HostName);                  // SSID = "Web_Monitor" [kein Passwort]
       delay(500);
       DrawMessageScreen_01("192.168.4.1");
       bool bShowMsgScr = true;
@@ -201,13 +343,16 @@ void setup(){
       sWifiSSID = MyESP.Read_WifiSSID(); sWifiSSID.trim();
       sWifiPassword = MyESP.Read_WifiPassword(); sWifiPassword.trim();
       Display.println(sWifiSSID + " verbinden:");
+      Serial.println(sWifiSSID + " verbinden:");
+            GreenLEDMode = "blink";
       iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-      WiFi.hostname(FirmwareName);
+      WiFi.hostname(HostName);
       WiFi.mode(WIFI_STA);
       iDummy = 0;
       WiFi.begin(sWifiSSID, sWifiPassword);
       while ((WiFi.status() != WL_CONNECTED)){
         Display.print(".");
+        Serial.print(".");
         ++iDummy;
         delay(400 + 100 * iDummy);
 
@@ -235,6 +380,7 @@ void setup(){
       if(iDummy <= 25){
         iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
         Display.println("WLAN-Verbindung hergestellt.");
+        Serial.println("WLAN-Verbindung hergestellt.");
         delay(500);
         ipDNS = WiFi.dnsIP();
         //ipRouter = {192,168,188,1};
@@ -243,15 +389,21 @@ void setup(){
         sDnsIP = String(ipDNS[0]) + "." + String(ipDNS[1]) + "." + String(ipDNS[2]) + "." + String(ipDNS[3]);
         iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
         Display.println("Router IP: " + sRouterIP);
+        Serial.println("Router IP: " + sRouterIP);
         iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
         Display.println("DNS IP: " + sDnsIP);
+        Serial.println("DNS IP: " + sDnsIP);
         ipESP8266 = WiFi.localIP();
         sESP8266IP = String(ipESP8266[0]) + "." + String(ipESP8266[1]) + "." + String(ipESP8266[2]) + "." + String(ipESP8266[3]);
         iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
         Display.println("Eigene IP: " + sESP8266IP);
+        Serial.println("Eigene IP: " + sESP8266IP);
         iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
         sTR064_User = MyESP.Read_TR064_User(); sTR064_User.trim();
+         String sESP8266Settings = String(sTR064_User) + "/" + String(sTR064_Password);
+        Serial.println("TR064_test: " + sESP8266Settings);
         TR_064.~TR064_Query();                                                      // Default-Instanz "TR_064" mittels Destructor löschen
+            RedLEDMode = "blink";
         new(&TR_064) TR064_Query(49000, sRouterIP, sTR064_User, sTR064_Password);   // Neue Instanz "TR_064" mit aktuellen Parametern erzeugen
         TR_064.init();
         iDummy = TR_064.getDeviceNumber();
@@ -263,19 +415,26 @@ void setup(){
           Display.println("TR-064 Verbindung gescheitert.");
           ProgState = CONFIG;  
         }
+            RedLEDMode = "off";
       }
       else ProgState = CONFIG;
         
       if(ProgState == CONFIG){
+        Serial.print("ProgStare: ");
+        Serial.println("CONFIG");
         Display.setTextColor(TFT_YELLOW);
         iPosY = 175; Display.setCursor(iPosX, iPosY);
         Display.println("Taster S1 kurz dr\201cken, um neu zu starten.");
+        Serial.println("Taster S1 kurz dr\201cken, um neu zu starten.");
         iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
         Display.println("Taster S1 >5s dr\201cken, um die existierende");
+        Serial.println("Taster S1 >5s dr\201cken, um die existierende");
         iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
         Display.println("Konfiguration zu l\224schen und neu einzugeben.");
+        Serial.println("Konfiguration zu l\224schen und neu einzugeben.");
         iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
         Display.println("Taster S2 kurz dr\201cken, um Demo-Modus zu starten.");   
+        Serial.println("Taster S2 kurz dr\201cken, um Demo-Modus zu starten.");
         while(1){
           ESP.wdtFeed();
           delay(10);
@@ -298,11 +457,24 @@ void setup(){
     else sConnType = "WAN-IP";
     iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
     Display.println("Es existiert eine " + sConnType + " Internetverbindung.");
+    Serial.println("Es existiert eine " + sConnType + " Internetverbindung.");
     Display.setTextColor(TFT_YELLOW);
     iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
     Display.print("Programm starten ");
-    for (int i=0; i<20; i++){
+    Serial.println("Programm starten");
+    for (int i=10; i>0; i--){
       Display.print(".");
+      if(i == 10){ Serial.println("[          ]");}
+      if(i == 9){  Serial.println("[.         ]");}
+      if(i == 8){  Serial.println("[..        ]");}
+      if(i == 7){  Serial.println("[...       ]");}
+      if(i == 6){  Serial.println("[....      ]");}
+      if(i == 5){  Serial.println("[.....     ]");}
+      if(i == 4){  Serial.println("[......    ]");}
+      if(i == 3){  Serial.println("[.......   ]");}
+      if(i == 2){  Serial.println("[........  ]");}
+      if(i == 1){  Serial.println("[......... ]");}
+      if(i == 0){  Serial.println("[..........]");}
       delay(500);
       ESP.wdtFeed();
     }
@@ -408,10 +580,14 @@ void loop(){
           if(bWebAvailable == true){
             DrawFlashTiny(210, 10, TFT_BLACK);
             DrawEarth(250, 10, true);
+            GreenLEDMode = "on";
+            Serial.print("Internet: Online ");
           }
           else{
             DrawFlashTiny(210, 10, TFT_YELLOW);
             DrawEarth(250, 10, false);
+            GreenLEDMode = "blink";
+            Serial.print("Internet: Offline.");
           }
           if(bGuestActive == true) DrawGuest(150, 7, TFT_ORANGE, TFT_DARKORANGE);
           else DrawGuest(150, 7, TFT_BLACK, TFT_BLACK); 
@@ -421,8 +597,11 @@ void loop(){
     }
 
     if(iTickerCount == 2){                                              // TickerCount 2: aktuelle Upload- und Download-Geschwindigkeit abrufen
+      RedLEDMode = "blink";
       lUpNow = long(TR_064.getNewByteUploadRate());
       lDownNow = long(TR_064.getNewByteDownloadRate()); 
+    if(Serial) Serial.println("\n\rTR064: Current up/download speed: " + String(lUpNow) + "/" + String(lDownNow));
+            RedLEDMode = "off";
     }
 
     if(iTickerCount == 3){                                              // TickerCount 3: Aktuelle Upload- und Download-Geschwindigkeit anzeigen
@@ -1313,32 +1492,45 @@ void DrawMessageScreen_01(String sIP_Address)
   Display.setTextSize(1);
   Display.setTextColor(TFT_WHITE);
   Display.setCursor(iPosX, iPosY);
-  Display.println("Der Router ist noch nicht");
+  Display.println("Der WebMonitor ist noch nicht");
+  Serial.println("Der WebMonitor ist noch nicht");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("konfiguriert. Zur");
+  Serial.println("konfiguriert. Zur");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("Konfiguration einen Computer");
+  Serial.println("Konfiguration einen Computer");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-  Display.println("mit dem WLAN \"Web_Monitor\"");
+  Display.println("mit dem WLAN \"WebMonitor\"");
+  Serial.println("mit dem WLAN \"WebMonitor\"");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("verbinden und die Website");
+  Serial.println("verbinden und die Website");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-  Display.println("http:\/\/" + sIP_Address + "\/index.html");
+  Display.println("http://" + sIP_Address + "/index.html");
+  Serial.println("http://" + sIP_Address + "/index.html");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("mit einem Browser \224ffnen.");
+  Serial.println("mit einem Browser \224ffnen.");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("Die Konfigurationswerte eintragen und auf den");
+  Serial.println("Die Konfigurationswerte eintragen und auf den");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("Button \"Alle Werte \201bernehmen\" klicken.");
+  Serial.println("Button \"Alle Werte \201bernehmen\" klicken.");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-  Display.println("Danach den Router neu starten.");
+  Display.println("Danach den WebMonitor neu starten.");
+  Serial.println("Danach den  WebMonitor neu starten.");
   iPosY = iPosY = iPosY + 30; Display.setCursor(iPosX, iPosY);
   Display.setTextColor(TFT_YELLOW);
   Display.println("ACHTUNG: Unbedingt auch die auf der Website");
+  Serial.println("ACHTUNG: Unbedingt auch die auf der Website");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-  Display.println("beschriebenen Einstellungen f\201r die TR-064");
+ Display.println("beschriebenen Einstellungen f\201r die TR-064");
+  Serial.println("beschriebenen Einstellungen f\201r die TR-064");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
-  Display.println("Kommunikation im Router vornehmen.");
+  Display.println("Kommunikation mit dem Router vornehmen.");
+  Serial.println("Kommunikation mit dem Router vornehmen.");
 }
 
 void DrawMessageScreen_02(String sWifiSSID, String sWifiPassword, String sTR064_User, String sTR064_Password, String sMaxDL_Speed, String sMaxUL_Speed)
@@ -1352,32 +1544,46 @@ void DrawMessageScreen_02(String sWifiSSID, String sWifiPassword, String sTR064_
   Display.setTextColor(TFT_WHITE);
   Display.setCursor(iPosX, iPosY);
   Display.println("WLAN Name:");
+  Serial.println("WLAN Name:");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("   \"" + sWifiSSID + "\"");
+  Serial.println("   \"" + sWifiSSID + "\"");
   iPosY = iPosY + 20;Display.setCursor(iPosX, iPosY);
   Display.println("WLAN Passwort:");
+  Serial.println("WLAN Passwort:");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("   \"" + sWifiPassword + "\"");
+  Serial.println("   \"" + sWifiPassword + "\"");
   iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
   Display.println("TR-064 User:");
+  Serial.println("TR-064 User:");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("   \"" + sTR064_User + "\"");
+  Serial.println("   \"" + sTR064_User + "\"");
   iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
   Display.println("TR-064 Passwort:");
+  Serial.println("TR-064 Passwort:");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("   \"" + sTR064_Password + "\"");
+  Serial.println("   \"" + sTR064_Password + "\"");
   iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
   Display.println("Download Speed - Upload Speed:");    
+  Serial.println("Download Speed - Upload Speed:");    
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);      
   Display.print("   " + sMaxDL_Speed + " MBit/s - ");      
+  Serial.print("   " + sMaxDL_Speed + " MBit/s - ");      
   Display.println(sMaxUL_Speed + " MBit/s");    
+  Serial.println(sMaxUL_Speed + " MBit/s");    
   Display.setTextColor(TFT_CYAN);
   iPosY = iPosY + 20; Display.setCursor(iPosX, iPosY);
-  Display.println("Jetzt den Web-Monitor neu starten.");
+  Display.println("Jetzt den WebMonitor neu starten.");
+  Serial.println("Jetzt den WebMonitor neu starten.");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("Dazu einen Taster dr\201cken oder die Spannungs-");
+  Serial.println("Dazu einen Taster dr\201cken oder die Spannungs-");
   iPosY = iPosY + 15; Display.setCursor(iPosX, iPosY);
   Display.println("versorgung kurz trennen und wieder verbinden.");
+  Serial.println("versorgung kurz trennen und wieder verbinden.");
 }
 
 void DrawMessageScreen_03(void)
@@ -1391,12 +1597,16 @@ void DrawMessageScreen_03(void)
   Display.setTextColor(TFT_WHITE);
   Display.setCursor(iPosX, iPosY);
   Display.println("Die Taste ca. 8 Sekunden");
+  Serial.println("Die Taste ca. 8 Sekunden");
   iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
   Display.println("gedr\201ckt halten, um");
+  Serial.println("gedr\201ckt halten, um");
   iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
   Display.println("die existierende");
+  Serial.println("die existierende");
   iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
   Display.println("Konfiguration zu l\224schen.");
+  Serial.println("Konfiguration zu l\224schen.");
 }
 
 void DrawMessageScreen_04(void)
@@ -1410,11 +1620,15 @@ void DrawMessageScreen_04(void)
   Display.setTextColor(TFT_RED);
   Display.setCursor(iPosX, iPosY);
   Display.println("Die Konfiguration wurde");
+  Serial.println("Die Konfiguration wurde");
   iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
   Display.println("vollst\204ndig gel\224scht!");
+  Serial.println("vollst\204ndig gel\224scht!");
   Display.setTextColor(TFT_WHITE);
   iPosY = iPosY + 50; Display.setCursor(iPosX, iPosY);
   Display.println("In wenigen Sekunden wird");
+  Serial.println("In wenigen Sekunden wird");
   iPosY = iPosY + 25; Display.setCursor(iPosX, iPosY);
   Display.println("ein Neustart durchgef\201hrt");
+  Serial.println("ein Neustart durchgef\201hrt");
 }

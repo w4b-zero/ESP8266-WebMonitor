@@ -5,22 +5,24 @@ Original Code von: <br>
  * Source: https://github.com/Joerg-66/ESP8266-WebMonitor<br>
 <br>
  Änderungen by zeroTM<br>
+# Version: 1.3+z1.1
+ Datum: 30/06/2024<br>
+ <br>
+   Änderungen
+   ++ FastLED Library (3.7.0) <br>
+   ++ 8 WS2812b Leds<br>
+      Pin4[SD_CS] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
+   ++ Grüne LED als Power/Boot Indicator (Boot: blinkend, Internet erkannt: on, Internet getrennt: blinkend)<br>
+   ++ Rote LED als TR064-Kommunikations Indicator (bei TR064 aufrufen blinkend)<br>
+ <br>   
+# Version: 1.3+z1 
  Datum: 06/2024<br>
  <br> 
-   Änderungen:  <br>
+   Änderungen: <br> 
    -- Adafruit ILI9341<br>
    ++ TFT_eSPI Bibliothek (mehrere Displays unterstützt!)<br>
    -- ILI9341_Graphic.h (class komplett entfernt)<br>
    -- ILI9341_Graphic.cpp (void-Funktionen in WebMonitor_1.ino eingefügt)<br>
-   <br>
-   <br>
-   In planung:<br>
-   ** auf Platformio wechseln<br>
-   ** ESP32 unterstützung<br>
-   ** Konfiguration erweitern(Einstellungen editierbar machen, Einstellungen erweitern)<br>
-   ** Touchscreen unterstützung<br>
-   ** Router Statistik<br>
-   ** Call-Monitor<br>
    <br>
 
 ## Die Entwicklungsumgebung
@@ -28,8 +30,9 @@ Lade und installiere von der Seite https://www.arduino.cc die Software Arduino (
  <br>
 Istalliere die folgenden Arduino Bibliotheken: <br>
 * Adafruit GFX Library	(Version 1.10.10) <br>
-* Adafruit BusIO			(Version 1.9.0) <br>
-* Adafruit STMPE610		(Version 1.1.3) <br>
+* Adafruit BusIO	(Version 1.9.0) <br>
+* Adafruit STMPE610	(Version 1.1.3) <br>
+* FastLED Library 	(Version 3.7.0) <br>
  <br>
 Lade und installiere die TR-064 Bibliotheken von: <br>
 * https://github.com/Aypac/Arduino-TR-064-SOAP-Library   (Version: 1.1.0 - Feb 2020) <br>
@@ -46,7 +49,7 @@ In der Arduino IDE unter "Voreinstellungen" im Feld "Zusätzliche Boardverwalter
 * https://arduino.esp8266.com/stable/package_esp8266com_index.json <br>
  <br>
 Nun kann in der Arduino IDE über den Boardverwalter das "ESP Community" Packet installiert weden: <br>
-ESP8266 Community		(Version 2.7.4) <br>
+* ESP8266 Community		(Version 2.7.4) <br>
 ***ACHTUNG! Aktuell muss das etwas ältere Paket wählen. Die Pakete Version 3.x.x verursachen einen Konflikt mit der TR-064-SOAP-Library.*** <br>
  <br>
 Jetzt ist in der Arduino IDE das Board "LOLIN(WEMOS) D1 R2 & mini" verfügbar und kann ausgewählt werden. <br>
@@ -90,8 +93,7 @@ Es sollten aber auch weitere Modelle des Herstellers funktionieren. <br>
  <br>
 <br>
 
-![beschreibung](images/display_beschreibung.png) <br>
-<br>
+![grafik](images/display_beschreibung.png)
  <br>
 ### *Zu den Einstellungen der Nutzerdaten und in der Fritz!Box siehe Verzeichnis "Quick and Easy"* <br>
 
@@ -106,8 +108,9 @@ Download and install the Arduino software (version 1.8.15) from https://www.ardu
  <br>
 Install the following Arduino libraries: <br>
 * Adafruit GFX Library	(Version 1.10.10) <br>
-* Adafruit BusIO			(Version 1.9.0) <br>
-* Adafruit STMPE610		(Version 1.1.3) <br>
+* Adafruit BusIO	(Version 1.9.0) <br>
+* Adafruit STMPE610	(Version 1.1.3) <br>
+* FastLED Library 	(Version 3.7.0) <br>
  <br>
 Download and install the TR-064 libraries from: <br>
 * https://github.com/Aypac/Arduino-TR-064-SOAP-Library (version: 1.1.0 - Feb 2020). <br>
@@ -124,7 +127,7 @@ In the Arduino IDE under "Preferences" in the field "Additional board manager UR
 * https://arduino.esp8266.com/stable/package_esp8266com_index.json <br>
  <br>
 Now you can install the "ESP Community" package in the Arduino IDE via the board manager: <br>
-ESP8266 Community (Version 2.7.4) <br>
+* ESP8266 Community (Version 2.7.4) <br>
 ***ATTENTION: Currently you have to choose the older package. The packages version 3.x.x cause a conflict with the TR-064-SOAP-Library.*** <br>
  <br>
 Now the board "LOLIN(WEMOS) D1 R2 & mini" is available in the Arduino IDE and can be selected. <br>
