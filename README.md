@@ -14,7 +14,9 @@ Original Code von: <br>
    ++ 8 WS2812b Leds<br>
       Pin4[SD_CS] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
    ++ Grüne LED als Power/Boot Indicator (Boot: blinkend, Internet erkannt: on, Internet getrennt: blinkend)<br>
+      Pin0[T_CS] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
    ++ Rote LED als TR064-Kommunikations Indicator (bei TR064 aufrufen blinkend)<br>
+      Pin16[T_IRQ] genutzt (leitung getrennt und Jumper hinzugefügt)<br>
  <br>   
 
 # Version: 1.3+z1 
